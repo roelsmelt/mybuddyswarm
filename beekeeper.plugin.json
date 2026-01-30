@@ -1,0 +1,13 @@
+{
+    "id": "beekeeper",
+    "kind": "native",
+    "configSchema": {
+        "type": "object",
+        "properties": {
+            "botsDir": {
+                "type": "string",
+                "default": "/bots"
+            }
+        }
+    }
+}

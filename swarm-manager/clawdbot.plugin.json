@@ -1,0 +1,6 @@
+{
+    "name": "swarm-manager",
+    "version": "1.0.0",
+    "description": "Manage the My Buddy Swarm (Orchestrator tools)",
+    "main": "index.js"
+}
