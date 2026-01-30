@@ -106,6 +106,53 @@ const plugin = {
                 });
             },
         });
+
+        context.registerTool({
+            name: 'send_buddy_message',
+            description: 'Send an administrative message to a specific buddy.',
+            parameters: Type.Object({
+                buddy_name: Type.String({ description: 'The name of the buddy' }),
+                message: Type.String({ description: 'The message content' }),
+            }),
+            async execute({ buddy_name, message }) {
+                return new Promise((resolve) => {
+                    exec(`docker exec buddy-${buddy_name} clawdbot message send --target self --message "ADMIN MESSAGE: ${message}"`, (error, stdout, stderr) => {
+                        if (error) {
+                            resolve({ error: error.message, details: stderr });
+                        } else {
+                            resolve({ message: `Message sent to ${buddy_name}.` });
+                        }
+                    });
+                });
+            },
+        });
+
+        context.registerTool({
+            name: 'broadcast_swarm_message',
+            description: 'Send an administrative message to all buddies in the swarm.',
+            parameters: Type.Object({
+                message: Type.String({ description: 'The message content' }),
+            }),
+            async execute({ message }) {
+                return new Promise((resolve) => {
+                    exec('docker ps --filter "name=buddy-" --format "{{.Names}}"', (error, stdout, stderr) => {
+                        if (error) return resolve({ error: error.message });
+                        const names = (stdout || '').trim().split('\n');
+                        const results = [];
+                        let pending = names.length;
+
+                        if (pending === 0) return resolve({ message: 'No buddies found to broadcast to.' });
+
+                        names.forEach((containerName) => {
+                            exec(`docker exec ${containerName} clawdbot message send --target self --message "SWARM BROADCAST: ${message}"`, (err) => {
+                                results.push(`${containerName}: ${err ? 'Failed' : 'Success'}`);
+                                if (--pending === 0) resolve({ results });
+                            });
+                        });
+                    });
+                });
+            },
+        });
     }
 };
 
