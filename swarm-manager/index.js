@@ -64,6 +64,48 @@ const plugin = {
                 });
             },
         });
+
+        context.registerTool({
+            name: 'install_skill',
+            description: 'Install and enable a skill for a specific buddy.',
+            parameters: Type.Object({
+                buddy_name: Type.String({ description: 'The name of the buddy (e.g. ess)' }),
+                skill_id: Type.String({ description: 'The ID of the skill to enable (e.g. memory-lancedb)' }),
+                config: Type.Optional(Type.Any({ description: 'Optional configuration for the skill' })),
+            }),
+            async execute({ buddy_name, skill_id, config }) {
+                const configPath = `/bots/${buddy_name}/config/clawdbot.json`;
+                return new Promise((resolve) => {
+                    fs.readFile(configPath, 'utf8', (err, data) => {
+                        if (err) return resolve({ error: `Could not read config for ${buddy_name}: ${err.message}` });
+
+                        try {
+                            const json = JSON.parse(data);
+                            if (!json.plugins) json.plugins = { entries: {} };
+                            if (!json.plugins.entries) json.plugins.entries = {};
+
+                            json.plugins.entries[skill_id] = {
+                                enabled: true,
+                                ...(config ? { config } : {})
+                            };
+
+                            const updatedData = JSON.stringify(json, null, 2);
+                            fs.writeFile(configPath, updatedData, (writeErr) => {
+                                if (writeErr) return resolve({ error: `Could not write config: ${writeErr.message}` });
+
+                                // Restart the buddy container to apply changes
+                                exec(`docker restart buddy-${buddy_name}`, (restartErr) => {
+                                    if (restartErr) return resolve({ message: `Config updated for ${buddy_name}, but restart failed.`, error: restartErr.message });
+                                    resolve({ message: `Skill '${skill_id}' successfully installed and ${buddy_name} restarted.` });
+                                });
+                            });
+                        } catch (parseErr) {
+                            resolve({ error: `Could not parse config: ${parseErr.message}` });
+                        }
+                    });
+                });
+            },
+        });
     }
 };
 
