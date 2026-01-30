@@ -1,4 +1,3 @@
-
 const { Type } = require('@sinclair/typebox');
 const { execFile, exec } = require('child_process');
 const fs = require('fs');
@@ -109,27 +108,38 @@ const plugin = {
 
         context.registerTool({
             name: 'send_buddy_message',
-            description: 'Send an administrative message to a specific buddy.',
+            description: 'Send an administrative message to a specific buddy (via their owner).',
             parameters: Type.Object({
                 buddy_name: Type.String({ description: 'The name of the buddy' }),
                 message: Type.String({ description: 'The message content' }),
             }),
             async execute({ buddy_name, message }) {
                 return new Promise((resolve) => {
-                    exec(`docker exec buddy-${buddy_name} clawdbot message send --target self --message "ADMIN MESSAGE: ${message}"`, (error, stdout, stderr) => {
-                        if (error) {
-                            resolve({ error: error.message, details: stderr });
+                    const configPath = `/bots/${buddy_name}/config/clawdbot.json`;
+                    try {
+                        const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                        const owners = cfg.channels?.whatsapp?.allowFrom || [];
+                        if (owners.length > 0) {
+                            exec(`docker exec buddy-${buddy_name} clawdbot message send --target ${owners[0]} --message "[SWARM MSG] ${message}"`, (error, stdout, stderr) => {
+                                if (error) {
+                                    resolve({ error: error.message, details: stderr });
+                                } else {
+                                    resolve({ message: `Message sent to ${buddy_name}'s owner.` });
+                                }
+                            });
                         } else {
-                            resolve({ message: `Message sent to ${buddy_name}.` });
+                            resolve({ error: `No owner found for ${buddy_name}` });
                         }
-                    });
+                    } catch (e) {
+                        resolve({ error: `Could not read config for ${buddy_name}: ${e.message}` });
+                    }
                 });
             },
         });
 
         context.registerTool({
             name: 'broadcast_swarm_message',
-            description: 'Send an administrative message to all buddies in the swarm.',
+            description: 'Send an administrative message to all Humans in the swarm.',
             parameters: Type.Object({
                 message: Type.String({ description: 'The message content' }),
             }),
@@ -144,10 +154,24 @@ const plugin = {
                         if (pending === 0) return resolve({ message: 'No buddies found to broadcast to.' });
 
                         names.forEach((containerName) => {
-                            exec(`docker exec ${containerName} clawdbot message send --target self --message "SWARM BROADCAST: ${message}"`, (err) => {
-                                results.push(`${containerName}: ${err ? 'Failed' : 'Success'}`);
+                            const shortName = containerName.replace('buddy-', '');
+                            const configPath = `/bots/${shortName}/config/clawdbot.json`;
+                            try {
+                                const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                                const owners = cfg.channels?.whatsapp?.allowFrom || [];
+                                if (owners.length > 0) {
+                                    exec(`docker exec ${containerName} clawdbot message send --target ${owners[0]} --message "[SWARM MESSAGE] ${message}"`, (err) => {
+                                        results.push(`${containerName}: ${err ? 'Failed' : 'Success'}`);
+                                        if (--pending === 0) resolve({ results });
+                                    });
+                                } else {
+                                    results.push(`${containerName}: No Owner found`);
+                                    if (--pending === 0) resolve({ results });
+                                }
+                            } catch (e) {
+                                results.push(`${containerName}: Config Error`);
                                 if (--pending === 0) resolve({ results });
-                            });
+                            }
                         });
                     });
                 });
