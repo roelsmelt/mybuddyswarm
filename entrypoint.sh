@@ -7,7 +7,11 @@ echo " -> Role: $ROLE"
 
 # Default Home Directory (mounted volume - must match fly.toml mount)
 export CLAWDBOT_HOME="/root/.clawdbot"
+mkdir -p "$CLAWDBOT_HOME/config"
 mkdir -p "$CLAWDBOT_HOME/agents/main/sessions"
+
+# Ensure dir exists
+mkdir -p "$CLAWDBOT_HOME"
 
 # Legacy/Ecosystem Variables
 export TELEGRAM_BOT_TOKEN="${CLAWDBOT_TELEGRAM_TOKEN}"
@@ -33,14 +37,20 @@ chown -R root:root "$CLAWDBOT_HOME" || true
 # SECURITY: Explicitly unset Anthropic key to prevent ANY accidental usage
 unset ANTHROPIC_API_KEY
 
+# STATE CLEANSE: Force any migrated agent state to Gemini
+echo " -> [CLEANSE] Purging Anthropic preferences from agent state..."
+if [ -d "$CLAWDBOT_HOME/agents" ]; then
+    find "$CLAWDBOT_HOME/agents" -name "*.json" -exec sed -i 's/anthropic/google/g' {} +
+    find "$CLAWDBOT_HOME/agents" -name "*.json" -exec sed -i 's/claude-[^"]*/gemini-1.5-pro/g' {} +
+fi
+
 bootstrap_config() {
-    CONFIG_PATH="$CLAWDBOT_HOME/clawdbot.json"
+    # Delete BOTH potential config locations to ensure no shadow config survives
+    rm -f "$CLAWDBOT_HOME/clawdbot.json"
+    rm -f "$CLAWDBOT_HOME/config/clawdbot.json"
     
-    # Preserve existing config - only bootstrap if missing
-    if [ -f "$CONFIG_PATH" ]; then
-        echo " -> Existing configuration found. Preserving..."
-        return 0
-    fi
+    CONFIG_PATH="$CLAWDBOT_HOME/clawdbot.json"
+    echo " -> Forced fresh generation. Writing bootstrap to $CONFIG_PATH..."
 
     # Dynamic Model Discovery (Gemini 3.0 / Smart Fallback)
     echo " -> [SMART] Discovering latest Gemini models..."
@@ -59,6 +69,7 @@ bootstrap_config() {
     echo " -> [SMART] Selected High-Tier (Fallback): $GEMINI_HIGH"
 
     echo " -> No configuration found. Writing initial bootstrap to $CONFIG_PATH..."
+    mkdir -p "$CLAWDBOT_HOME/config"
     cat <<EOF > "$CONFIG_PATH"
 {
   "env": {
@@ -68,8 +79,8 @@ bootstrap_config() {
     "GOG_ACCOUNT": "rulerulez@gmail.com",
     "CLAWDBOT_TELEGRAM_TOKEN": "${CLAWDBOT_TELEGRAM_TOKEN}",
     "TELEGRAM_BOT_TOKEN": "${CLAWDBOT_TELEGRAM_TOKEN}",
-    "TELEGRAM_ADMIN_ID": ${TELEGRAM_ADMIN_ID},
-    "ADMIN_ID": ${TELEGRAM_ADMIN_ID}
+    "TELEGRAM_ADMIN_ID": "${TELEGRAM_ADMIN_ID}",
+    "ADMIN_ID": "${TELEGRAM_ADMIN_ID}"
   },
   "agents": {
     "defaults": {
@@ -87,16 +98,36 @@ bootstrap_config() {
       "dmPolicy": "pairing",
       "groupPolicy": "allowlist",
       "streamMode": "partial"
+    },
+    "whatsapp": {
+      "sendReadReceipts": true,
+      "dmPolicy": "allowlist",
+      "allowFrom": [
+        "+31654377400"
+      ],
+      "groupPolicy": "allowlist",
+      "mediaMaxMb": 50,
+      "debounceMs": 0
     }
   },
   "plugins": {
+    "slots": {
+      "memory": "memory-lancedb"
+    },
     "entries": {
       "telegram": {
+        "enabled": true
+      },
+      "whatsapp": {
         "enabled": true
       },
       "memory-lancedb": {
         "enabled": true,
         "config": {
+          "embedding": {
+            "apiKey": "${GEMINI_API_KEY}",
+            "model": "text-embedding-004"
+          },
           "autoCapture": true,
           "autoRecall": true
         }
@@ -113,6 +144,10 @@ env | grep CLAWDBOT_ || true
 env | grep TELEGRAM_ || true
 
 bootstrap_config
+
+# DOCTOR: Fix any schema issues automatically
+echo " -> [DOCTOR] Repairing configuration schema..."
+node /app/node_modules/clawdbot/dist/entry.js doctor --fix || true
 
 # Start Gateway
 # Using node directly for better signal handling and log forwarding

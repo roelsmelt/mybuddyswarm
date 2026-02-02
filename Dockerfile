@@ -14,7 +14,7 @@ COPY discover_models.py /app/discover_models.py
 RUN chmod +x /entrypoint.sh
 
 # CLAWDBOT_HOME should be the volume mount
-ENV CLAWDBOT_HOME="/root/clawd"
+ENV CLAWDBOT_HOME="/root/.clawdbot"
 
 # DEBUG: Ensure logs are not buffered
 ENV NODE_LOG_LEVEL=debug
