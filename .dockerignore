@@ -1,0 +1,10 @@
+node_modules
+.git
+.gemini
+*.log
+.DS_Store
+Dockerfile
+fly.toml
+migration/
+tmp/
+buddy/

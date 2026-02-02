@@ -1,0 +1,16 @@
+{
+    "name": "buddy-template",
+    "channels": {
+        "whatsapp": {
+            "enabled": true,
+            "allowFrom": []
+        }
+    },
+    "plugins": {
+        "entries": {
+            "memory-lancedb": {
+                "enabled": true
+            }
+        }
+    }
+}

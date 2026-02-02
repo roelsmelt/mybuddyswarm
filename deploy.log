@@ -1,0 +1,125 @@
+==> Verifying app config
+Validating /Users/roelsmelt/Antigravity/Viriya/MyBuddy/fly.toml
+[32m✓[0m Configuration is valid
+--> Verified app config
+==> Building image
+Waiting for depot builder...
+
+==> Building image with Depot
+--> build:  (​)
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 67B 0.3s
+#1 transferring dockerfile: 560B 0.5s done
+#1 DONE 0.5s
+
+#2 [internal] load metadata for docker.io/library/node:22-slim
+#2 DONE 0.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 69B 0.1s
+#3 transferring context: 162B 0.4s done
+#3 DONE 0.4s
+
+#4 [1/6] FROM docker.io/library/node:22-slim@sha256:f86be15afa9a8277608e141ce2a8aa55d3d9c40845921b8511f4fb7897be2554
+#4 resolve docker.io/library/node:22-slim@sha256:f86be15afa9a8277608e141ce2a8aa55d3d9c40845921b8511f4fb7897be2554 done
+#4 DONE 0.0s
+
+#5 [2/6] RUN apt-get update && apt-get install -y curl ssh tar procps && rm -rf /var/lib/apt/lists/*
+#5 CACHED
+
+#6 [3/6] WORKDIR /app
+#6 CACHED
+
+#7 [internal] load build context
+#7 transferring context: 72B 0.3s done
+#7 DONE 0.3s
+
+#8 [4/6] RUN npm install -g clawdbot
+#8 11.32 npm error code ENOENT
+#8 11.32 npm error syscall spawn git
+#8 11.32 npm error path git
+#8 11.32 npm error errno -2
+#8 11.32 npm error enoent An unknown git error occurred
+#8 11.32 npm error enoent This is related to npm not being able to find a file.
+#8 11.32 npm error enoent
+#8 11.32 npm notice
+#8 11.32 npm notice New major version of npm available! 10.9.4 -> 11.8.0
+#8 11.32 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.8.0
+#8 11.32 npm notice To update run: npm install -g npm@11.8.0
+#8 11.32 npm notice
+#8 11.32 npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-02T10_54_46_310Z-debug-0.log
+#8 ERROR: process "/bin/sh -c npm install -g clawdbot" did not complete successfully: exit code: 254
+------
+ > [4/6] RUN npm install -g clawdbot:
+11.32 npm error errno -2
+11.32 npm error enoent An unknown git error occurred
+11.32 npm error enoent This is related to npm not being able to find a file.
+11.32 npm error enoent
+11.32 npm notice
+11.32 npm notice New major version of npm available! 10.9.4 -> 11.8.0
+11.32 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.8.0
+11.32 npm notice To update run: npm install -g npm@11.8.0
+11.32 npm notice
+11.32 npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-02T10_54_46_310Z-debug-0.log
+------
+==> Building image
+Waiting for depot builder...
+
+==> Building image with Depot
+--> build:  (​)
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 67B 0.2s
+#1 transferring dockerfile: 560B 0.5s done
+#1 DONE 0.5s
+
+#2 [internal] load metadata for docker.io/library/node:22-slim
+#2 DONE 0.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 69B 0.1s
+#3 transferring context: 162B 0.4s done
+#3 DONE 0.4s
+
+#4 [1/6] FROM docker.io/library/node:22-slim@sha256:f86be15afa9a8277608e141ce2a8aa55d3d9c40845921b8511f4fb7897be2554
+#4 resolve docker.io/library/node:22-slim@sha256:f86be15afa9a8277608e141ce2a8aa55d3d9c40845921b8511f4fb7897be2554 done
+#4 DONE 0.0s
+
+#5 [2/6] RUN apt-get update && apt-get install -y curl ssh tar procps && rm -rf /var/lib/apt/lists/*
+#5 CACHED
+
+#6 [3/6] WORKDIR /app
+#6 CACHED
+
+#7 [internal] load build context
+#7 transferring context: 72B 0.3s done
+#7 DONE 0.3s
+
+#8 [4/6] RUN npm install -g clawdbot
+#8 10.87 npm error code ENOENT
+#8 10.87 npm error syscall spawn git
+#8 10.87 npm error path git
+#8 10.87 npm error errno -2
+#8 10.87 npm error enoent An unknown git error occurred
+#8 10.87 npm error enoent This is related to npm not being able to find a file.
+#8 10.87 npm error enoent
+#8 10.87 npm notice
+#8 10.87 npm notice New major version of npm available! 10.9.4 -> 11.8.0
+#8 10.87 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.8.0
+#8 10.87 npm notice To update run: npm install -g npm@11.8.0
+#8 10.87 npm notice
+#8 10.87 npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-02T10_55_02_084Z-debug-0.log
+#8 ERROR: process "/bin/sh -c npm install -g clawdbot" did not complete successfully: exit code: 254
+------
+ > [4/6] RUN npm install -g clawdbot:
+10.87 npm error errno -2
+10.87 npm error enoent An unknown git error occurred
+10.87 npm error enoent This is related to npm not being able to find a file.
+10.87 npm error enoent
+10.87 npm notice
+10.87 npm notice New major version of npm available! 10.9.4 -> 11.8.0
+10.87 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.8.0
+10.87 npm notice To update run: npm install -g npm@11.8.0
+10.87 npm notice
+10.87 npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-02T10_55_02_084Z-debug-0.log
+------
+Error: failed to fetch an image or build from source: error building: failed to solve: process "/bin/sh -c npm install -g clawdbot" did not complete successfully: exit code: 254
