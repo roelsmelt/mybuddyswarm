@@ -5,9 +5,9 @@ ROLE=${ROLE:-buddy}
 echo "🐝 Starting MyBuddyTalk Gateway..."
 echo " -> Role: $ROLE"
 
-# Default Home Directory (mounted volume)
-export CLAWDBOT_HOME="/root/clawd"
-mkdir -p "$CLAWDBOT_HOME/config"
+# Default Home Directory (mounted volume - must match fly.toml mount)
+export CLAWDBOT_HOME="/root/.clawdbot"
+mkdir -p "$CLAWDBOT_HOME/agents/main/sessions"
 
 # Legacy/Ecosystem Variables
 export TELEGRAM_BOT_TOKEN="${CLAWDBOT_TELEGRAM_TOKEN}"
@@ -34,11 +34,12 @@ chown -R root:root "$CLAWDBOT_HOME" || true
 unset ANTHROPIC_API_KEY
 
 bootstrap_config() {
-    CONFIG_PATH="$CLAWDBOT_HOME/config/clawdbot.json"
+    CONFIG_PATH="$CLAWDBOT_HOME/clawdbot.json"
     
+    # Preserve existing config - only bootstrap if missing
     if [ -f "$CONFIG_PATH" ]; then
-        echo " -> Existing configuration found. DELETING to force fresh generation (Gemini migration)..."
-        rm -f "$CONFIG_PATH"
+        echo " -> Existing configuration found. Preserving..."
+        return 0
     fi
 
     # Dynamic Model Discovery (Gemini 3.0 / Smart Fallback)
@@ -82,9 +83,7 @@ bootstrap_config() {
   },
   "channels": {
     "telegram": {
-      "enabled": true,
       "botToken": "${CLAWDBOT_TELEGRAM_TOKEN}",
-      "username": "mybuddyemrys_bot",
       "dmPolicy": "pairing",
       "groupPolicy": "allowlist",
       "streamMode": "partial"
@@ -98,23 +97,9 @@ bootstrap_config() {
       "memory-lancedb": {
         "enabled": true,
         "config": {
-          "embedding": {
-            "apiKey": "${GEMINI_API_KEY}",
-            "model": "gemini-embedding-001",
-            "baseURL": "https://generativelanguage.googleapis.com/v1beta/openai/"
-          },
           "autoCapture": true,
           "autoRecall": true
         }
-      },
-      "beekeeper": {
-        "enabled": true,
-        "config": {
-          "botsDir": "$CLAWDBOT_HOME/bots"
-        }
-      },
-      "swarm-manager": {
-        "enabled": true
       }
     }
   }
@@ -134,7 +119,7 @@ bootstrap_config
 BINARY="/app/node_modules/clawdbot/dist/entry.js"
 
 echo " -> [DIAGNOSTIC] Current configuration:"
-cat "$CLAWDBOT_HOME/config/clawdbot.json"
+cat "$CLAWDBOT_HOME/clawdbot.json"
 
 # Start Gateway
 CMD="node $BINARY gateway --port 18789 --allow-unconfigured"
