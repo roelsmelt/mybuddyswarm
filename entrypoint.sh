@@ -129,7 +129,11 @@ bootstrap_config() {
             "model": "text-embedding-004"
           },
           "autoCapture": true,
-          "autoRecall": true
+          "autoRecall": true,
+          "embedding": {
+            "provider": "google",
+            "model": "text-embedding-004"
+          }
         }
       }
     }
@@ -156,8 +160,10 @@ BINARY="/app/node_modules/clawdbot/dist/entry.js"
 echo " -> [DIAGNOSTIC] Current configuration:"
 cat "$CLAWDBOT_HOME/clawdbot.json"
 
-# Start Gateway
-CMD="node $BINARY gateway --port 18789 --allow-unconfigured"
+# Start Gateway - bind to LAN for Fly.io proxy with auto-generated token
+GATEWAY_TOKEN="${CLAWDBOT_GATEWAY_TOKEN:-$(openssl rand -hex 16)}"
+export CLAWDBOT_GATEWAY_TOKEN="$GATEWAY_TOKEN"
+CMD="node $BINARY gateway --port 18789 --bind lan --token $GATEWAY_TOKEN --allow-unconfigured"
 
 echo " -> Executing: $CMD"
 exec $CMD
