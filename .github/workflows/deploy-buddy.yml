@@ -46,7 +46,7 @@ jobs:
           sed -i 's/"name": "moltbot-sandbox"/"name": "${{ inputs.buddy_name }}"/' wrangler.jsonc
           sed -i 's/"bucket_name": "moltbot-data"/"bucket_name": "${{ inputs.buddy_name }}-data"/' wrangler.jsonc
           
-          # Create correct moltbot.json.template (NO token key!)
+          # Create correct moltbot.json.template with identity
           cat > moltbot.json.template << 'EOF'
           {
             "agents": {
@@ -56,7 +56,17 @@ jobs:
                   "primary": "anthropic/claude-sonnet-4-20250514",
                   "fallbacks": ["anthropic/claude-3-5-haiku-20241022"]
                 }
-              }
+              },
+              "list": [
+                {
+                  "id": "main",
+                  "identity": {
+                    "name": "Emrys",
+                    "theme": "wise and curious companion",
+                    "emoji": "🦉"
+                  }
+                }
+              ]
             },
             "channels": {
               "telegram": {
@@ -71,6 +81,20 @@ jobs:
             }
           }
           EOF
+          
+          # Copy workspace files (SOUL.md, etc.) into Dockerfile build
+          mkdir -p workspace-files
+          curl -sL "https://raw.githubusercontent.com/roelsmelt/mybuddyswarm/main/buddies/roelbuddy-emrys/workspace/SOUL.md" -o workspace-files/SOUL.md || echo "SOUL.md not found"
+          curl -sL "https://raw.githubusercontent.com/roelsmelt/mybuddyswarm/main/buddies/roelbuddy-emrys/workspace/IDENTITY.md" -o workspace-files/IDENTITY.md || echo "IDENTITY.md not found"
+          curl -sL "https://raw.githubusercontent.com/roelsmelt/mybuddyswarm/main/buddies/roelbuddy-emrys/workspace/USER.md" -o workspace-files/USER.md || echo "USER.md not found"
+          curl -sL "https://raw.githubusercontent.com/roelsmelt/mybuddyswarm/main/buddies/roelbuddy-emrys/workspace/MEMORY.md" -o workspace-files/MEMORY.md || echo "MEMORY.md not found"
+          
+          # Add workspace files to Dockerfile
+          if [ -f workspace-files/SOUL.md ]; then
+            echo "" >> Dockerfile
+            echo "# Copy workspace bootstrap files" >> Dockerfile
+            echo "COPY workspace-files/*.md /root/clawd/" >> Dockerfile
+          fi
 
       - name: Create R2 bucket
         run: |
