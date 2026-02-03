@@ -1,0 +1,89 @@
+name: Deploy Buddy Moltworker
+
+on:
+  workflow_dispatch:
+    inputs:
+      buddy_name:
+        description: 'Buddy name (e.g., roel-buddy-emrys)'
+        required: true
+        type: string
+      telegram_bot_token:
+        description: 'Telegram Bot Token (from @BotFather)'
+        required: true
+        type: string
+
+env:
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout mybuddyswarm
+        uses: actions/checkout@v4
+
+      - name: Clone Moltworker base
+        run: |
+          git clone https://github.com/nicholasoxford/moltworker.git moltworker-base
+          cd moltworker-base
+          npm install
+
+      - name: Configure buddy
+        run: |
+          cd moltworker-base
+          
+          # Update wrangler.jsonc with buddy name
+          sed -i 's/"name": "moltbot-sandbox"/"name": "${{ inputs.buddy_name }}"/' wrangler.jsonc
+          sed -i 's/"bucket_name": "moltbot-data"/"bucket_name": "${{ inputs.buddy_name }}-data"/' wrangler.jsonc
+          
+          # Create correct moltbot.json.template (NO token key!)
+          cat > moltbot.json.template << 'EOF'
+          {
+            "agents": {
+              "defaults": {
+                "workspace": "/root/clawd",
+                "model": {
+                  "primary": "anthropic/claude-sonnet-4-20250514",
+                  "fallbacks": ["anthropic/claude-3-5-haiku-20241022"]
+                }
+              }
+            },
+            "channels": {
+              "telegram": {
+                "enabled": true
+              }
+            },
+            "gateway": {
+              "port": 18789,
+              "mode": "local"
+            }
+          }
+          EOF
+
+      - name: Create R2 bucket
+        run: |
+          cd moltworker-base
+          npx wrangler r2 bucket create ${{ inputs.buddy_name }}-data || echo "Bucket may already exist"
+
+      - name: Set secrets
+        run: |
+          cd moltworker-base
+          echo "${{ secrets.ANTHROPIC_API_KEY }}" | npx wrangler secret put ANTHROPIC_API_KEY
+          echo "${{ inputs.telegram_bot_token }}" | npx wrangler secret put TELEGRAM_BOT_TOKEN
+          echo "${{ secrets.MOLTBOT_GATEWAY_TOKEN }}" | npx wrangler secret put MOLTBOT_GATEWAY_TOKEN
+          echo "true" | npx wrangler secret put DEV_MODE
+          echo "${{ secrets.R2_ACCESS_KEY_ID }}" | npx wrangler secret put R2_ACCESS_KEY_ID
+          echo "${{ secrets.R2_SECRET_ACCESS_KEY }}" | npx wrangler secret put R2_SECRET_ACCESS_KEY
+          echo "${{ env.CLOUDFLARE_ACCOUNT_ID }}" | npx wrangler secret put CF_ACCOUNT_ID
+
+      - name: Deploy to Cloudflare
+        run: |
+          cd moltworker-base
+          npx wrangler deploy
+
+      - name: Output URLs
+        run: |
+          echo "✅ Buddy deployed!"
+          echo "🌐 Control UI: https://${{ inputs.buddy_name }}.viriya.workers.dev"
+          echo "🤖 Telegram: Ready to chat!"
