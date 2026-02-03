@@ -29,8 +29,10 @@ jobs:
           node-version: '20'
 
       - name: Clone Moltworker base
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          git clone --depth 1 https://github.com/nicholasoxford/moltworker.git moltworker-base
+          gh repo clone nicholasoxford/moltworker moltworker-base -- --depth 1
 
       - name: Install dependencies
         working-directory: moltworker-base
