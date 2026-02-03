@@ -60,7 +60,8 @@ jobs:
             },
             "channels": {
               "telegram": {
-                "enabled": true
+                "enabled": true,
+                "dmPolicy": "open"
               }
             },
             "gateway": {
