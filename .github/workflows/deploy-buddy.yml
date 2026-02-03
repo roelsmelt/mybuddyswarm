@@ -61,7 +61,8 @@ jobs:
             "channels": {
               "telegram": {
                 "enabled": true,
-                "dmPolicy": "open"
+                "dmPolicy": "allowlist",
+                "allowFrom": ["tg:6528670828", "*"]
               }
             },
             "gateway": {
