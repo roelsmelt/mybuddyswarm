@@ -32,7 +32,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh repo clone nicholasoxford/moltworker moltworker-base -- --depth 1
+          gh repo clone cloudflare/moltworker moltworker-base -- --depth 1
 
       - name: Install dependencies
         working-directory: moltworker-base
