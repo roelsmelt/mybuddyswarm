@@ -82,19 +82,32 @@ jobs:
           }
           EOF
           
-          # Copy workspace files (SOUL.md, etc.) into Dockerfile build
-          mkdir -p workspace-files
-          curl -sL "https://raw.githubusercontent.com/roelsmelt/mybuddyswarm/main/buddies/roelbuddy-emrys/workspace/SOUL.md" -o workspace-files/SOUL.md || echo "SOUL.md not found"
-          curl -sL "https://raw.githubusercontent.com/roelsmelt/mybuddyswarm/main/buddies/roelbuddy-emrys/workspace/IDENTITY.md" -o workspace-files/IDENTITY.md || echo "IDENTITY.md not found"
-          curl -sL "https://raw.githubusercontent.com/roelsmelt/mybuddyswarm/main/buddies/roelbuddy-emrys/workspace/USER.md" -o workspace-files/USER.md || echo "USER.md not found"
-          curl -sL "https://raw.githubusercontent.com/roelsmelt/mybuddyswarm/main/buddies/roelbuddy-emrys/workspace/MEMORY.md" -o workspace-files/MEMORY.md || echo "MEMORY.md not found"
+          # Create workspace sync script (runs at container startup)
+          cat > sync-workspace.sh << 'SYNCEOF'
+          #!/bin/bash
+          # Sync workspace files from R2 backup to container workspace
+          BACKUP_DIR="/data/moltbot"
+          WORKSPACE="/root/clawd"
           
-          # Add workspace files to Dockerfile
-          if [ -f workspace-files/SOUL.md ]; then
-            echo "" >> Dockerfile
-            echo "# Copy workspace bootstrap files" >> Dockerfile
-            echo "COPY workspace-files/*.md /root/clawd/" >> Dockerfile
+          # Restore workspace files from R2 if they exist
+          if [ -d "$BACKUP_DIR/workspace" ]; then
+            echo "Restoring workspace files from R2..."
+            cp -a "$BACKUP_DIR/workspace/." "$WORKSPACE/" 2>/dev/null || true
+            echo "Workspace restored: $(ls -la $WORKSPACE/*.md 2>/dev/null | wc -l) files"
+          else
+            echo "No workspace backup in R2 yet"
           fi
+          SYNCEOF
+          chmod +x sync-workspace.sh
+          
+          # Add sync script to Dockerfile and call it from start-moltbot.sh
+          echo "" >> Dockerfile
+          echo "# Add workspace sync script" >> Dockerfile
+          echo "COPY sync-workspace.sh /usr/local/bin/sync-workspace.sh" >> Dockerfile
+          echo "RUN chmod +x /usr/local/bin/sync-workspace.sh" >> Dockerfile
+          
+          # Patch start-moltbot.sh to call workspace sync
+          sed -i '/^echo "Starting Moltbot Gateway..."/i # Sync workspace from R2\n/usr/local/bin/sync-workspace.sh\n' start-moltbot.sh || true
 
       - name: Create R2 bucket
         run: |
