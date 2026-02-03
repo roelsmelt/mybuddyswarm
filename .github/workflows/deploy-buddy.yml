@@ -23,11 +23,18 @@ jobs:
       - name: Checkout mybuddyswarm
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Clone Moltworker base
         run: |
-          git clone https://github.com/nicholasoxford/moltworker.git moltworker-base
-          cd moltworker-base
-          npm install
+          git clone --depth 1 https://github.com/nicholasoxford/moltworker.git moltworker-base
+
+      - name: Install dependencies
+        working-directory: moltworker-base
+        run: npm install
 
       - name: Configure buddy
         run: |
