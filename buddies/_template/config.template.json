@@ -1,0 +1,36 @@
+{
+  "env": {
+    "GEMINI_API_KEY": "${GEMINI_API_KEY}",
+    "BRAVE_API_KEY": "${BRAVE_API_KEY}",
+    "CLAWDBOT_TELEGRAM_TOKEN": "${TELEGRAM_BOT_TOKEN}",
+    "TELEGRAM_BOT_TOKEN": "${TELEGRAM_BOT_TOKEN}",
+    "TELEGRAM_ADMIN_ID": "${TELEGRAM_ADMIN_ID}",
+    "ADMIN_ID": "${TELEGRAM_ADMIN_ID}"
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "google/gemini-3-flash-preview",
+        "fallbacks": ["google/gemini-3-pro-preview"]
+      }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "dmPolicy": "pairing",
+      "groupPolicy": "allowlist",
+      "streamMode": "partial"
+    }
+  },
+  "gateway": {
+    "mode": "local"
+  },
+  "plugins": {
+    "entries": {
+      "telegram": {
+        "enabled": true
+      }
+    }
+  }
+}

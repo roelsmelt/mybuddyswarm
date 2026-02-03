@@ -1,2 +1,7 @@
 migration/
 buddies/ess_migration/
+
+# Secrets - NEVER commit
+.env.secrets
+.env.local
+.env

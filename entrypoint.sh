@@ -45,12 +45,15 @@ if [ -d "$CLAWDBOT_HOME/agents" ]; then
 fi
 
 bootstrap_config() {
-    # Delete BOTH potential config locations to ensure no shadow config survives
-    rm -f "$CLAWDBOT_HOME/clawdbot.json"
-    rm -f "$CLAWDBOT_HOME/config/clawdbot.json"
-    
     CONFIG_PATH="$CLAWDBOT_HOME/clawdbot.json"
-    echo " -> Forced fresh generation. Writing bootstrap to $CONFIG_PATH..."
+    
+    # Only bootstrap if config doesn't exist (preserve volume data!)
+    if [ -f "$CONFIG_PATH" ]; then
+        echo " -> Config exists at $CONFIG_PATH, preserving..."
+        return 0
+    fi
+    
+    echo " -> No config found. Bootstrapping fresh config to $CONFIG_PATH..."
 
     # Dynamic Model Discovery (Gemini 3.0 / Smart Fallback)
     echo " -> [SMART] Discovering latest Gemini models..."
@@ -79,8 +82,8 @@ bootstrap_config() {
     "GOG_ACCOUNT": "rulerulez@gmail.com",
     "CLAWDBOT_TELEGRAM_TOKEN": "${CLAWDBOT_TELEGRAM_TOKEN}",
     "TELEGRAM_BOT_TOKEN": "${CLAWDBOT_TELEGRAM_TOKEN}",
-    "TELEGRAM_ADMIN_ID": "${TELEGRAM_ADMIN_ID}",
-    "ADMIN_ID": "${TELEGRAM_ADMIN_ID}"
+    "TELEGRAM_ADMIN_ID": "${TELEGRAM_ADMIN_ID:-}",
+    "ADMIN_ID": "${TELEGRAM_ADMIN_ID:-}"
   },
   "agents": {
     "defaults": {
@@ -110,32 +113,13 @@ bootstrap_config() {
       "debounceMs": 0
     }
   },
+  "gateway": {
+    "mode": "local"
+  },
   "plugins": {
-    "slots": {
-      "memory": "memory-lancedb"
-    },
     "entries": {
-      "telegram": {
-        "enabled": true
-      },
-      "whatsapp": {
-        "enabled": true
-      },
-      "memory-lancedb": {
-        "enabled": true,
-        "config": {
-          "embedding": {
-            "apiKey": "${GEMINI_API_KEY}",
-            "model": "text-embedding-004"
-          },
-          "autoCapture": true,
-          "autoRecall": true,
-          "embedding": {
-            "provider": "google",
-            "model": "text-embedding-004"
-          }
-        }
-      }
+      "telegram": {"enabled": true},
+      "whatsapp": {"enabled": true}
     }
   }
 }
@@ -149,16 +133,15 @@ env | grep TELEGRAM_ || true
 
 bootstrap_config
 
-# DOCTOR: Fix any schema issues automatically
-echo " -> [DOCTOR] Repairing configuration schema..."
-node /app/node_modules/clawdbot/dist/entry.js doctor --fix || true
+# Skip doctor - causes EPIPE errors in non-interactive mode
+# Config validation happens at gateway startup anyway
+echo " -> Skipping doctor (non-interactive mode)..."
 
 # Start Gateway
 # Using node directly for better signal handling and log forwarding
 BINARY="/app/node_modules/clawdbot/dist/entry.js"
 
-echo " -> [DIAGNOSTIC] Current configuration:"
-cat "$CLAWDBOT_HOME/clawdbot.json"
+echo " -> Config loaded. Starting gateway..."
 
 # Start Gateway - bind to LAN for Fly.io proxy with auto-generated token
 GATEWAY_TOKEN="${CLAWDBOT_GATEWAY_TOKEN:-$(openssl rand -hex 16)}"

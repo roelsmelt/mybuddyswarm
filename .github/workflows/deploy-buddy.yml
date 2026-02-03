@@ -28,11 +28,12 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Clone Moltworker base
+      - name: Clone Moltworker fork (with workspace sync)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh repo clone cloudflare/moltworker moltworker-base -- --depth 1
+          # Use our fork with workspace + memory R2 sync support
+          gh repo clone roelsmelt/moltworker moltworker-base -- --depth 1
 
       - name: Install dependencies
         working-directory: moltworker-base
@@ -82,32 +83,10 @@ jobs:
           }
           EOF
           
-          # Create workspace sync script (runs at container startup)
-          cat > sync-workspace.sh << 'SYNCEOF'
-          #!/bin/bash
-          # Sync workspace files from R2 backup to container workspace
-          BACKUP_DIR="/data/moltbot"
-          WORKSPACE="/root/clawd"
-          
-          # Restore workspace files from R2 if they exist
-          if [ -d "$BACKUP_DIR/workspace" ]; then
-            echo "Restoring workspace files from R2..."
-            cp -a "$BACKUP_DIR/workspace/." "$WORKSPACE/" 2>/dev/null || true
-            echo "Workspace restored: $(ls -la $WORKSPACE/*.md 2>/dev/null | wc -l) files"
-          else
-            echo "No workspace backup in R2 yet"
-          fi
-          SYNCEOF
-          chmod +x sync-workspace.sh
-          
-          # Add sync script to Dockerfile and call it from start-moltbot.sh
-          echo "" >> Dockerfile
-          echo "# Add workspace sync script" >> Dockerfile
-          echo "COPY sync-workspace.sh /usr/local/bin/sync-workspace.sh" >> Dockerfile
-          echo "RUN chmod +x /usr/local/bin/sync-workspace.sh" >> Dockerfile
-          
-          # Patch start-moltbot.sh to call workspace sync
-          sed -i '/^echo "Starting Moltbot Gateway..."/i # Sync workspace from R2\n/usr/local/bin/sync-workspace.sh\n' start-moltbot.sh || true
+          # Note: Workspace sync is now built into our Moltworker fork (roelsmelt/moltworker)
+          # - Syncs /root/clawd/*.md to R2/workspace/ every 5 min
+          # - Syncs /root/clawd/memory/ to R2/memory/ every 5 min
+          # - Restores both on container startup
 
       - name: Create R2 bucket
         run: |

@@ -1,0 +1,89 @@
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "google/gemini-3-flash-preview",
+        "fallbacks": ["google/gemini-3-pro-preview"]
+      },
+      "imageModel": {
+        "primary": "google/gemini-2.5-flash"
+      },
+      "workspace": "/data/workspace",
+      "maxConcurrent": 4,
+      "compaction": {
+        "mode": "safeguard",
+        "reserveTokensFloor": 30000,
+        "memoryFlush": {
+          "enabled": true,
+          "softThresholdTokens": 4000
+        }
+      },
+      "timeoutSeconds": 900
+    },
+    "list": [
+      {
+        "id": "main",
+        "default": true
+      }
+    ]
+  },
+  "tools": {
+    "web": {
+      "search": {
+        "enabled": true,
+        "maxResults": 8
+      },
+      "fetch": {
+        "maxChars": 60000
+      }
+    }
+  },
+  "messages": {
+    "responsePrefix": "",
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto"
+  },
+  "channels": {
+    "whatsapp": {
+      "enabled": true,
+      "sendReadReceipts": true,
+      "dmPolicy": "allowlist",
+      "allowFrom": ["+31654377400"],
+      "groupPolicy": "allowlist",
+      "mediaMaxMb": 50
+    },
+    "telegram": {
+      "enabled": false,
+      "dmPolicy": "allowlist",
+      "groupPolicy": "allowlist",
+      "streamMode": "partial"
+    }
+  },
+  "gateway": {
+    "mode": "local",
+    "bind": "auto"
+  },
+  "plugins": {
+    "slots": {
+      "memory": "memory-lancedb"
+    },
+    "entries": {
+      "whatsapp": {
+        "enabled": true
+      },
+      "telegram": {
+        "enabled": false
+      },
+      "memory-lancedb": {
+        "enabled": true,
+        "config": {
+          "autoCapture": true,
+          "autoRecall": true
+        }
+      }
+    }
+  }
+}
