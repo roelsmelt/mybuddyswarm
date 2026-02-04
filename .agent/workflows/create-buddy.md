@@ -128,23 +128,38 @@ Create/update `buddies/<human>-<buddy>.json`:
 
 ## What's Automatic Now
 
-| Feature | Status |
-|---------|--------|
-| Volume permissions | ✅ Fixed by entrypoint.sh (chown /data) |
-| State dir security | ✅ chmod 700 by auto-setup.js |
-| Persistent pairing | ✅ Stored on /data/.openclaw |
-| Workspace templates | ✅ Copied from /app/templates |
-| Template variables | ✅ {{BUDDY_NAME}}, {{HUMAN}} replaced |
+| Feature | Status | How |
+|---------|--------|-----|
+| Volume permissions | ✅ | `entrypoint.sh` runs `chown -R openclaw:openclaw /data` |
+| Persistent pairing | ✅ | `entrypoint.sh` exports `OPENCLAW_STATE_DIR=/data/.openclaw` |
+| Persistent workspace | ✅ | `entrypoint.sh` exports `OPENCLAW_WORKSPACE_DIR=/data/workspace` |
+| State dir security | ✅ | `auto-setup.js` sets chmod 700 on state dir |
+| Template copying | ✅ | `auto-setup.js` copies from /app/templates |
+| Template variables | ✅ | `{{BUDDY_NAME}}`, `{{HUMAN}}` replaced |
+
+## Key Architecture
+
+```
+entrypoint.sh (runs as root)
+├── chown /data → openclaw user
+├── export OPENCLAW_STATE_DIR=/data/.openclaw
+├── export OPENCLAW_WORKSPACE_DIR=/data/workspace
+└── exec as openclaw → auto-setup.js → server.js
+```
+
+**Why this works:** OpenClaw uses `./.openclaw` (relative to /app) by default.
+Without env vars, data is ephemeral. The entrypoint exports volume paths BEFORE app starts.
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Permission denied on /data | Wait for entrypoint.sh fix deploy |
-| Pairing code expired | Send new message, get fresh code |
-| Healthcheck fails | Check logs: `railway logs` |
-| "API key expired" | Redeploy to pick up new GEMINI_API_KEY |
-| Pairing lost after redeploy | Ensure volume mounted, check symlinks |
+| Issue | Root Cause | Solution |
+|-------|------------|----------|
+| Pairing lost after redeploy | Env vars not exported | Redeploy with latest entrypoint.sh |
+| Permission denied on /data | Volume mounted as root | entrypoint.sh fixes this |
+| Pairing code expired | Takes 60s, code TTL short | Send new message for fresh code |
+| Healthcheck fails | Service still starting | Wait 2-3 min after deploy |
+| "API key expired" | GEMINI_API_KEY rotated | Redeploy to pick up shared var |
+| Logs show `./.openclaw` | Old entrypoint running | Check `railway deploys` for latest |
 
 ## Role Reference
 
@@ -152,3 +167,4 @@ Create/update `buddies/<human>-<buddy>.json`:
 |------|---------|--------|
 | buddy | GCS_BUDDY_KEY | MyBuddybook only |
 | magician | GCS_MAGICIAN_KEY | MyBuddybook + Spellbook |
+
