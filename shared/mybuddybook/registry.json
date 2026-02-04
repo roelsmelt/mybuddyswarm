@@ -1,0 +1,38 @@
+{
+  "swarm": "MyBuddyTalk",
+  "version": "0.1.0",
+  "updated_at": "2026-02-02T17:35:00Z",
+  "buddies": [
+    {
+      "id": "roelbuddy-emrys",
+      "human": "Roel",
+      "name": "Emrys",
+      "role": "magician",
+      "channels": {
+        "telegram": true,
+        "whatsapp": true
+      },
+      "telegram_bot": "@mybuddyemrys_bot",
+      "status": "active",
+      "spawned_at": "2026-01-27T00:00:00Z",
+      "spawned_by": "genesis"
+    },
+    {
+      "id": "estherbuddy-kazeh",
+      "human": "Esther",
+      "name": "Kazeh",
+      "role": "buddy",
+      "channels": {
+        "telegram": true,
+        "whatsapp": true
+      },
+      "status": "migration",
+      "spawned_at": "2026-01-30T00:00:00Z",
+      "spawned_by": "RoelBuddy-Emrys"
+    }
+  ],
+  "whatsapp_assignments": {
+    "Roel": "roelbuddy-emrys",
+    "Esther": "estherbuddy-kazeh"
+  }
+}

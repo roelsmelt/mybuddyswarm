@@ -1,0 +1,101 @@
+{
+  "env": {
+    "BRAVE_API_KEY": "BSAv-TxltOcX6_JYJjS2OZi3FWATzh-",
+    "GEMINI_API_KEY": "AIzaSyAmlRwSzH-Z11dKPzkciC8YZZwY-02TxkU"
+  },
+  "browser": {
+    "headless": true,
+    "noSandbox": true
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "google/gemini-3-flash-preview",
+        "fallbacks": [
+          "google/gemini-3-pro-preview"
+        ]
+      },
+      "imageModel": {
+        "primary": "google/gemini-2.5-flash",
+        "fallbacks": []
+      },
+      "compaction": {
+        "mode": "safeguard",
+        "reserveTokensFloor": 30000,
+        "memoryFlush": {
+          "enabled": true,
+          "softThresholdTokens": 4000
+        }
+      },
+      "timeoutSeconds": 900,
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
+    }
+  },
+  "tools": {
+    "web": {
+      "search": {
+        "enabled": true,
+        "maxResults": 8
+      },
+      "fetch": {
+        "maxChars": 60000
+      }
+    }
+  },
+  "messages": {
+    "responsePrefix": "",
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto"
+  },
+  "channels": {
+    "whatsapp": {
+      "sendReadReceipts": true,
+      "dmPolicy": "allowlist",
+      "allowFrom": [
+        "+31654377400"
+      ],
+      "groupPolicy": "allowlist",
+      "mediaMaxMb": 50,
+      "debounceMs": 0
+    },
+    "telegram": {
+      "dmPolicy": "pairing",
+      "groupPolicy": "allowlist",
+      "streamMode": "partial"
+    }
+  },
+  "gateway": {
+    "mode": "local"
+  },
+  "plugins": {
+    "slots": {
+      "memory": "memory-lancedb"
+    },
+    "entries": {
+      "whatsapp": {
+        "enabled": true
+      },
+      "telegram": {
+        "enabled": true
+      },
+      "memory-lancedb": {
+        "enabled": true,
+        "config": {
+          "embedding": {
+            "apiKey": "AIzaSyAmlRwSzH-Z11dKPzkciC8YZZwY-02TxkU",
+            "model": "gemini-embedding-001",
+            "baseURL": "https://generativelanguage.googleapis.com/v1beta/openai/"
+          },
+          "autoCapture": true,
+          "autoRecall": true
+        }
+      }
+    }
+  }
+}

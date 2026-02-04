@@ -1,0 +1,17 @@
+{
+  "name": "mybuddy-swarm",
+  "version": "1.0.0",
+  "description": "Multi-tenant bot manager for MyBuddy on Railway",
+  "main": "manager.js",
+  "scripts": {
+    "start": "node manager.js",
+    "dev": "node manager.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
