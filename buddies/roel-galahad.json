@@ -1,0 +1,17 @@
+{
+    "$comment_required": "=== REQUIRED FIELDS (you fill these) ===",
+    "human": "roel",
+    "buddy_name": "galahad",
+    "telegram_bot_username": "@RoelBuddy_GalahadBot",
+    "telegram_bot_token": "8259658096:AAHj5sH28QvMIz-ndLmWX5P1TPBrQfTarSM",
+    "$comment_auto": "=== AUTO-GENERATED (system fills these) ===",
+    "service_id": "b2fc6665-a21e-43d5-b94d-e79610330cb5",
+    "service_name": "Roel | Galahad",
+    "service_url": "roel-galahad.up.railway.app",
+    "volume_name": "roel-galahad-data",
+    "setup_password": "3c14da10a2bc0648293f1df2bc5802f3",
+    "status": "active",
+    "paired_user_id": "6528670828",
+    "created_at": "2026-02-04T19:00:00Z",
+    "last_updated": "2026-02-04T20:48:00Z"
+}

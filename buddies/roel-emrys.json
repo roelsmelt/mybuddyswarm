@@ -1,0 +1,15 @@
+{
+    "human": "roel",
+    "buddy_name": "emrys",
+    "role": "magician",
+    "telegram_bot_username": "@roel_emrys_bot",
+    "telegram_bot_token": "8268526633:AAHZQ7GiwipAFQL8u0L7Yhr0I_KiBJbSkBg",
+    "service_id": "2f9064d7-8e47-4a39-8004-3f2742d7cf64",
+    "service_name": "Roel | Emrys",
+    "service_url": "roel-or-emrys-production.up.railway.app",
+    "setup_password": "c07e96ad6ee6ba24d55453e25b52dcc7",
+    "volume_name": "roel-or-emrys-data",
+    "gcs_key_var": "GCS_MAGICIAN_KEY",
+    "status": "active",
+    "notes": "Fresh install 2026-02-04. Magician role with spellbook access."
+}

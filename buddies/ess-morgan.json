@@ -1,0 +1,12 @@
+{
+    "human": "ess",
+    "buddy_name": "morgan",
+    "telegram_bot_username": "",
+    "telegram_bot_token": "",
+    "service_id": "",
+    "service_name": "Ess | Morgan",
+    "service_url": "ess-morgan.up.railway.app",
+    "volume_name": "morgan-data",
+    "status": "active",
+    "notes": "Ess's primary buddy"
+}

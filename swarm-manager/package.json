@@ -1,7 +1,0 @@
-{
-    "name": "swarm-manager",
-    "version": "1.0.0",
-    "dependencies": {
-        "@sinclair/typebox": "^0.32.0"
-    }
-}

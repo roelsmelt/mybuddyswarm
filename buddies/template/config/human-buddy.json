@@ -1,0 +1,14 @@
+{
+    "$comment": "Config template for a new BUDDY - can only access MyBuddybook",
+    "role": "buddy",
+    "_required": "=== TE VULLEN ===",
+    "human": "",
+    "buddy_name": "",
+    "telegram_bot_username": "",
+    "telegram_bot_token": "",
+    "_auto": "=== AUTO-GENERATED ===",
+    "service_id": "",
+    "service_url": "",
+    "gcs_key_var": "GCS_BUDDY_KEY",
+    "status": "pending"
+}

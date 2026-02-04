@@ -1,2 +1,5 @@
-migration/
+.env
+.secrets/
 buddies/ess_migration/
+migration/
+node_modules/

@@ -1,0 +1,19 @@
+{
+    "name": "railway-buddy-manager",
+    "version": "1.0.0",
+    "description": "Railway API-based buddy management for MyBuddyTalk swarm",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "list": "node index.js list",
+        "status": "node index.js status",
+        "logs": "node index.js logs"
+    },
+    "dependencies": {
+        "axios": "^1.6.0",
+        "dotenv": "^16.0.0"
+    },
+    "engines": {
+        "node": ">=20.0.0"
+    }
+}
