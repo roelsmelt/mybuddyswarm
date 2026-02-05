@@ -19,6 +19,13 @@ This workflow creates buddies reliably. Optimized for automation and scale (10-2
 4. **Pairing is async** - User provides code AFTER deploy
 5. **State dir permissions** - Auto-fixed to 700 by auto-setup.js
 6. **Build takes ~3 min** - Wait for SUCCESS before testing
+7. **GEMINI_API_KEY is required** ⚠️ - Must be set per-service OR as shared variable. Auto-setup fails without it!
+8. **Rate limit between services** - Wait 60+ seconds between creating multiple services ("Endpoint too recently updated")
+9. **Volumes cannot be auto-provisioned** - Railway config-as-code (railway.toml) only supports build/deploy settings, NOT volumes. Must add via CLI.
+10. **CLI timeouts don't mean failure** ⚠️ - When Railway CLI times out, the operation may still succeed. Always verify with `railway volume list` before retrying to avoid duplicates!
+11. **OPENCLAW_MODEL format matters** - Must include provider prefix: `google/gemini-2.0-flash` (NOT just `gemini-2.0-flash`). Default `-exp` model is deprecated/invalid!
+12. **Redeploy vs new deploy** - `railway redeploy` restarts existing container. For env var changes, container must restart to pick them up. Verify with `/setup/api/status` after redeploy.
+13. **One volume per service** - Multiple volumes at same mount point causes issues. Check with `railway volume list` before adding.
 
 ## Step 1: Gather Info
 
@@ -76,21 +83,47 @@ cat .secrets/buddy-gcs-key.json | railway variable set GCS_BUDDY_KEY --stdin
 cat .secrets/magician-gcs-key.json | railway variable set GCS_MAGICIAN_KEY --stdin
 ```
 
+## Step 6b: Set GEMINI_API_KEY (CRITICAL!)
+// turbo
+```bash
+# Check if shared variable exists, otherwise set per-service:
+railway variable set "GEMINI_API_KEY=AIzaSyAmlRwSzH-Z11dKPzkciC8YZZwY-02TxkU"
+```
+
 ## Step 7: Generate Domain
 // turbo
 ```bash
 railway domain --json
 ```
 
-## Step 8: Wait for Build (~3 min)
+## Step 8: Wait for Build & VERIFY (~3 min)
+
+⚠️ **DO NOT SKIP VERIFICATION - do not report success until ALL checks pass!**
 
 ```bash
-# Check status until SUCCESS
-railway service status --json
+# Wait for build to complete
+sleep 180
 
-# Test healthcheck
+# 1. Healthcheck
 curl -s "https://<DOMAIN>/setup/healthz"
 # Expected: {"ok":true}
+
+# 2. Configuration status & MODEL check
+curl -s "https://<DOMAIN>/setup/api/status" \
+  -H "Authorization: Basic $(echo -n ':<SETUP_PASSWORD>' | base64)" | jq -r '.configured, .openclawVersion'
+# Expected: true, 2026.x.x
+
+# 3. Check logs for correct model
+railway logs | grep -E "Model:" | tail -1
+# Expected: "Model: google/gemini-2.0-flash" (NOT gemini-2.0-flash-exp!)
+```
+
+**If model is wrong:** 
+```bash
+curl -X POST "https://<DOMAIN>/setup/api/reset" -H "Authorization: Basic $(echo -n ':<SETUP_PASSWORD>' | base64)"
+railway variable set "OPENCLAW_MODEL=google/gemini-2.0-flash"
+railway redeploy --yes
+# Wait 2 min, re-verify
 ```
 
 ## Step 9: Telegram Pairing (ASYNC!)

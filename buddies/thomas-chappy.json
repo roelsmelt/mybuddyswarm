@@ -1,0 +1,13 @@
+{
+    "human": "thomas",
+    "buddy_name": "chappy",
+    "role": "buddy",
+    "telegram_bot_username": "@thomas_chappy_bot",
+    "telegram_bot_token": "8169759174:AAF8JjXxBljojvEtqleN2tjCUATG1h5lf-I",
+    "service_name": "Thomas-Chappy",
+    "service_url": "thomas-chappy-production.up.railway.app",
+    "setup_password": "5f6814e421df0bc9f1530773f2bd89a0",
+    "status": "active",
+    "telegram_user_id": "6528670828",
+    "notes": "Thomas's buddy - Chappy"
+}

@@ -1,0 +1,13 @@
+{
+    "human": "lucas",
+    "buddy_name": "wall-e",
+    "role": "buddy",
+    "telegram_bot_username": "@lucas_walle_bot",
+    "telegram_bot_token": "8329355328:AAHUybbRrDhXH7sP1p-jZAp8_0bJLU5cVk0",
+    "service_name": "Lucas-Wall-E",
+    "service_url": "lucas-wall-e-production.up.railway.app",
+    "setup_password": "c951413d2a0335952a7eac0c5d630ba3",
+    "status": "active",
+    "telegram_user_id": "6528670828",
+    "notes": "Lucas's buddy - Wall-E"
+}
